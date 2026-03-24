@@ -19,7 +19,7 @@ public class EmailServiceImpl implements EmailService {
     @Value("${T_EMAIL}")
      private String fromEmail;
 
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate;
 
     @Override
     public void sendEmail(String to, String subject, String body) {
