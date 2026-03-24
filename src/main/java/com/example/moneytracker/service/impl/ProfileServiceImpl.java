@@ -53,12 +53,18 @@ public class ProfileServiceImpl implements ProfileService {
 
         String activationLink = activationUrl + "/activation/" + newProfile.getActivationToken();
 
-        emailService.sendEmail(
+        try {
+           emailService.sendEmail(
                 newProfile.getEmail(),
                 "Account Activation",
                 "Click to activate: " + activationLink
         );
 
+         } catch (Exception e) {
+    System.out.println("Email failed: " + e.getMessage());
+    }
+
+       
         return toDto(newProfile);
     }
 
