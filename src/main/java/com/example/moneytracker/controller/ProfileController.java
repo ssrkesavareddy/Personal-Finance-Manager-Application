@@ -42,6 +42,26 @@ public class ProfileController {
                     .body("Activation failed or already used");
         }
     }
+    @PostMapping("/resend-activation")
+public ResponseEntity<String> resendActivation(@RequestParam String email) {
+
+    ProfileEntity user = profileRepository.findByEmail(email)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+
+    if (user.getIsActive()) {
+        return ResponseEntity.badRequest().body("Account already activated");
+    }
+
+    String activationLink = activationUrl + "/activation/" + user.getActivationToken();
+
+    emailService.sendEmail(
+            user.getEmail(),
+            "Resend Activation",
+            "Click to activate: " + activationLink
+    );
+
+    return ResponseEntity.ok("Activation email sent");
+}
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthDto authDto) {
