@@ -77,19 +77,33 @@ public ProfileDto createProfile(ProfileDto profileDto) {
     }
 
     @Override
-    public Map<String, Object> authenticateAndGenerateToken(AuthDto authDto) {
+public Map<String, Object> authenticateAndGenerateToken(AuthDto authDto) {
 
-        try {
-            authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            authDto.getEmail(),
-                            authDto.getPassword()
-                    )
-            );
+    try {
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        authDto.getEmail(),
+                        authDto.getPassword()
+                )
+        );
+    } catch (Exception e) {
+        throw new RuntimeException("Invalid email or password");
+    }
 
-        } catch (Exception e) {
-            throw new RuntimeException("Invalid email or password");
-        }
+    // ✅ PUT IT HERE (after authentication)
+    if (!isAccountActive(authDto.getEmail())) {
+        throw new RuntimeException(
+                "Account not activated. Please check your email or use resend activation."
+        );
+    }
+
+    String token = jwtUtil.generateToken(authDto.getEmail());
+
+    return Map.of(
+            "token", token,
+            "user", getPublicProfile(authDto.getEmail())
+    );
+}
 
 // separate logic
         if (!isAccountActive(authDto.getEmail())) {
