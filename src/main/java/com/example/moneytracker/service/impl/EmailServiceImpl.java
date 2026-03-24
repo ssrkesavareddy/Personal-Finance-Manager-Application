@@ -16,8 +16,9 @@ public class EmailServiceImpl implements EmailService {
 
     @Value("${BREVO_API_KEY}")
     private String brevoApiKey;
+
     @Value("${T_EMAIL}")
-     private String fromEmail;
+    private String fromEmail;
 
     private final RestTemplate restTemplate;
 
@@ -33,20 +34,28 @@ public class EmailServiceImpl implements EmailService {
         Map<String, Object> requestBody = Map.of(
                 "sender", Map.of(
                         "name", "MoneyTracker",
-                        "email", fromEmail   
+                        "email", fromEmail
                 ),
                 "to", List.of(Map.of("email", to)),
                 "subject", subject,
                 "htmlContent", "<h3>Activate Account</h3><p>" + body + "</p>"
         );
 
-        HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
+        HttpEntity<Map<String, Object>> request =
+                new HttpEntity<>(requestBody, headers);
 
         ResponseEntity<String> response =
                 restTemplate.postForEntity(url, request, String.class);
 
-        if (!response.getStatusCode().is2xxSuccessful()) {
-            throw new RuntimeException("Failed to send email: " + response.getBody());
+        String responseBody = response.getBody();
+        System.out.println("BREVO RESPONSE: " + responseBody);
+
+        if (!response.getStatusCode().is2xxSuccessful() ||
+                (responseBody != null && responseBody.contains("error"))) {
+
+            throw new RuntimeException("Brevo failed: " + responseBody);
         }
+
+        System.out.println("Email sent to: " + to);
     }
 }
