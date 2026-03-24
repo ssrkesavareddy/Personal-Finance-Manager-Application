@@ -58,7 +58,7 @@ public ProfileDto createProfile(ProfileDto profileDto) {
     try {
         emailService.sendEmail(newProfile.getEmail(), subject, body);
     } catch (Exception e) {
-        System.out.println("Email failed: " + e.getMessage());
+        System.out.println("Email failed: " + e.printStackTrace());
     }
 
     return toDto(newProfile);
