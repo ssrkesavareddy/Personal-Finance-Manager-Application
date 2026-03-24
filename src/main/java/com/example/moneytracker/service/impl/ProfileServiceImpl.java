@@ -107,6 +107,23 @@ public class ProfileServiceImpl implements ProfileService {
         );
     }
 
+    @Override
+    public ProfileEntity getCurrentProfile() {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new RuntimeException("User not authenticated");
+        }
+
+        String email = authentication.getName();
+
+        return profileRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new UsernameNotFoundException("Profile not found with email: " + email +" "+authentication.getName())
+                );
+    }
+
     private boolean isAccountActive(String email) {
         return profileRepository.findByEmail(email)
                 .map(ProfileEntity::getIsActive)
