@@ -34,7 +34,7 @@ public class ProfileServiceImpl implements ProfileService {
     @Value("${backendapp.activation.url}")
     private String activationUrl;
 
-   @Override
+  @Override
 public ProfileDto createProfile(ProfileDto profileDto) {
 
     if (profileRepository.findByEmail(profileDto.getEmail()).isPresent()) {
@@ -58,12 +58,13 @@ public ProfileDto createProfile(ProfileDto profileDto) {
     try {
         emailService.sendEmail(newProfile.getEmail(), subject, body);
     } catch (Exception e) {
-        System.out.println("Email failed: " + e.printStackTrace());
+        System.out.println("Email failed: " + e.getMessage());
+        e.printStackTrace();
+        // DON'T fail registration
     }
 
     return toDto(newProfile);
 }
-
     @Override
     public boolean activateProfile(String activationToken) {
         return profileRepository.findByActivationToken(activationToken)
