@@ -4,8 +4,12 @@ package com.example.moneytracker.controller;
 
 import com.example.moneytracker.dto.AuthDto;
 import com.example.moneytracker.dto.ProfileDto;
+import com.example.moneytracker.entity.ProfileEntity;
+import com.example.moneytracker.repository.ProfileRepository;
+import com.example.moneytracker.service.EmailService;
 import com.example.moneytracker.service.ProfileService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +21,10 @@ import java.util.Map;
 public class ProfileController {
 
     private final ProfileService profileService;
+    private final ProfileRepository profileRepository;
+    private final EmailService emailService;
+    @Value("${backendapp.activation.url}")
+    private String activationUrl;
 
     @PostMapping("/register")
     public ResponseEntity<?> registerProfile(@RequestBody ProfileDto profileDto) {
