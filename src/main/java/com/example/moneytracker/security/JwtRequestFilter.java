@@ -28,7 +28,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        String path = request.getServletPath();
+         String path = request.getRequestURI();
 
         // Skip public endpoints
         if (path.contains("/register") || path.contains("/login") || path.contains("/activation")) {
