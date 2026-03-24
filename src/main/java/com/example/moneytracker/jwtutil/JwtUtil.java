@@ -10,7 +10,7 @@ import java.util.Date;
 
 @Component
 public class JwtUtil {
-    @Value("${jwt-secret-key}")
+    @Value("${jwt.secret}")
     private  String SECRET; // min 32 chars
     private final long EXPIRATION = 1000 * 60 * 60; // 1 hour
 
