@@ -30,23 +30,39 @@ public class ProfileServiceImpl implements ProfileService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
-    @Value("{backendapp.activation.url}")
+
+    @Value("${backendapp.activation.url}")
     private String activationUrl;
 
+   @Override
+public ProfileDto createProfile(ProfileDto profileDto) {
 
-
-    @Override
-    public ProfileDto createProfile(ProfileDto profileDto) {
-        ProfileEntity newProfile = toEntity(profileDto);
-        newProfile.setActivationToken(UUID.randomUUID().toString());
-        newProfile = profileRepository.save(newProfile);
-        // send activation email
-        String activationLink = activationUrl+"/api/activation/" + newProfile.getActivationToken();
-        String subject = "New Profile Activation ";
-        String body="click on the link to activate your profile " + activationLink ;
-        emailService.sendEmail(newProfile.getEmail(), subject, body);
-        return toDto(newProfile);
+    if (profileRepository.findByEmail(profileDto.getEmail()).isPresent()) {
+        throw new RuntimeException("Email already exists");
     }
+
+    ProfileEntity newProfile = toEntity(profileDto);
+    newProfile.setActivationToken(UUID.randomUUID().toString());
+
+    newProfile = profileRepository.save(newProfile);
+
+    if (activationUrl == null || activationUrl.isBlank()) {
+        throw new RuntimeException("Activation URL not configured");
+    }
+
+    String activationLink = activationUrl + "/activation/" + newProfile.getActivationToken();
+
+    String subject = "Account Activation";
+    String body = "Click to activate: " + activationLink;
+
+    try {
+        emailService.sendEmail(newProfile.getEmail(), subject, body);
+    } catch (Exception e) {
+        System.out.println("Email failed: " + e.getMessage());
+    }
+
+    return toDto(newProfile);
+}
 
     @Override
     public boolean activateProfile(String activationToken) {
@@ -87,14 +103,15 @@ public class ProfileServiceImpl implements ProfileService {
         );
     }
 
-    private ProfileEntity toEntity(ProfileDto dto) {
-        return ProfileEntity.builder()
-                .fullName(dto.getFullName())
-                .email(dto.getEmail())
-                .password(passwordEncoder.encode(dto.getPassword()))
-                .profileImgUrl(dto.getProfileImgUrl())
-                .build();
-    }
+  private ProfileEntity toEntity(ProfileDto dto) {
+    return ProfileEntity.builder()
+            .fullName(dto.getFullName())
+            .email(dto.getEmail())
+            .password(passwordEncoder.encode(dto.getPassword()))
+            .profileImgUrl(dto.getProfileImgUrl())
+            .isActive(false)   
+            .build();
+}
 
     private ProfileDto toDto(ProfileEntity entity) {
         return ProfileDto.builder()
