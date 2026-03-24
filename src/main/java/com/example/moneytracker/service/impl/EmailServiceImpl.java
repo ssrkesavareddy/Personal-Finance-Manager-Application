@@ -16,6 +16,8 @@ public class EmailServiceImpl implements EmailService {
 
     @Value("${BREVO_API_KEY}")
     private String brevoApiKey;
+    @Value("${T_EMAIL}")
+     private String fromEmail;
 
     private final RestTemplate restTemplate = new RestTemplate();
 
@@ -31,7 +33,7 @@ public class EmailServiceImpl implements EmailService {
         Map<String, Object> requestBody = Map.of(
                 "sender", Map.of(
                         "name", "MoneyTracker",
-                        "email", "noreply@brevo.com"   // TEMP (no domain)
+                        "email", fromEmail   
                 ),
                 "to", List.of(Map.of("email", to)),
                 "subject", subject,
