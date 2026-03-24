@@ -3,33 +3,48 @@ package com.example.moneytracker.service.impl;
 import com.example.moneytracker.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 public class EmailServiceImpl implements EmailService {
 
-    private final JavaMailSender mailSender;
+    @Value("${BREVO_API_KEY}")
+    private String brevoApiKey;
 
-    @Value("${app.mail.from}")
-    private String fromEmail;
+    private final RestTemplate restTemplate = new RestTemplate();
 
     @Override
     public void sendEmail(String to, String subject, String body) {
 
-        try {
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom(fromEmail);
-            message.setTo(to);
-            message.setSubject(subject);
-            message.setText(body);
+        String url = "https://api.brevo.com/v3/smtp/email";
 
-            mailSender.send(message);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("api-key", brevoApiKey);
+        headers.setContentType(MediaType.APPLICATION_JSON);
 
-        } catch (Exception e) {
-            throw new RuntimeException("Email sending failed", e);
+        Map<String, Object> requestBody = Map.of(
+                "sender", Map.of(
+                        "name", "MoneyTracker",
+                        "email", "noreply@brevo.com"   // TEMP (no domain)
+                ),
+                "to", List.of(Map.of("email", to)),
+                "subject", subject,
+                "htmlContent", "<h3>Activate Account</h3><p>" + body + "</p>"
+        );
+
+        HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
+
+        ResponseEntity<String> response =
+                restTemplate.postForEntity(url, request, String.class);
+
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            throw new RuntimeException("Failed to send email: " + response.getBody());
         }
     }
 }
