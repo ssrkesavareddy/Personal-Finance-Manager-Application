@@ -31,7 +31,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         String path = request.getServletPath();
 
         // Skip public endpoints
-        if (path.equals("/register") || path.equals("/login") || path.startsWith("/activation")) {
+        if (path.contains("/register") || path.contains("/login") || path.contains("/activation")) {
             filterChain.doFilter(request, response);
             return;
         }
