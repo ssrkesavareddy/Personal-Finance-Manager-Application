@@ -18,6 +18,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.http.HttpMethod;
 
 import java.util.List;
 
@@ -37,16 +38,17 @@ public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Excepti
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         )
         .authorizeHttpRequests(auth -> auth
-                .requestMatchers(
-                        "/register",
-                        "/login",
-                        "/activation/**",
-                        "/resend-activation",
-                        "/status",
-                        "/health"
-                ).permitAll()
-                .anyRequest().authenticated()
-        )
+          .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()  // <-- add this line
+          .requestMatchers(
+        "/register",
+        "/login",
+        "/activation/**",
+        "/resend-activation",
+        "/status",
+        "/health"
+    ).permitAll()
+    .anyRequest().authenticated()
+)
         .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 
     return http.build();
@@ -57,18 +59,19 @@ public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Excepti
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("*"));
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
-        config.setAllowedHeaders(List.of("Authorization", "Accept", "Content-Type"));
-        config.setAllowCredentials(false);
+   @Bean
+public CorsConfigurationSource corsConfigurationSource() {
+    CorsConfiguration config = new CorsConfiguration();
+    // Replace "*" with your actual frontend URL in production
+    config.setAllowedOrigins(List.of("*"));
+    config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+    config.setAllowedHeaders(List.of("Authorization", "Accept", "Content-Type"));
+    config.setAllowCredentials(false); // keep false since you use token auth
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
-        return source;
-    }
+    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    source.registerCorsConfiguration("/**", config);
+    return source;
+}
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
