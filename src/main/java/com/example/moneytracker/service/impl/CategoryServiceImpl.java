@@ -5,16 +5,10 @@ import com.example.moneytracker.entity.CategoryEntity;
 import com.example.moneytracker.entity.ProfileEntity;
 import com.example.moneytracker.enums.CategoryType;
 import com.example.moneytracker.repository.CategoryRepository;
-
 import com.example.moneytracker.service.CategoryService;
-import com.example.moneytracker.service.ExpenseService;
-import com.example.moneytracker.service.IncomeService;
 import com.example.moneytracker.service.ProfileService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -24,26 +18,21 @@ public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
     private final ProfileService profileService;
 
-
-    //save category
     @Override
     public CategoryDto saveCategory(CategoryDto categoryDto) {
-
         ProfileEntity profile = profileService.getCurrentProfile();
 
         if (categoryRepository.existsByNameAndProfileId(
                 categoryDto.getName(),
                 profile.getId()
         )) {
-            throw new RuntimeException( "Category already exists");
+            throw new RuntimeException("Category already exists");
         }
 
         CategoryEntity category = toEntity(categoryDto, profile);
         category = categoryRepository.save(category);
-
         return toDto(category);
     }
-
 
     public List<CategoryDto> getCategoriesForCurrentUser() {
         ProfileEntity profile = profileService.getCurrentProfile();
@@ -69,36 +58,32 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoryDto updateCategory(Long categoryId, CategoryDto categoryDto) {
         ProfileEntity profile = profileService.getCurrentProfile();
-       CategoryEntity existingCategory = categoryRepository.findByIdAndProfileId(categoryId, profile.getId())
-                .orElseThrow(() -> new RuntimeException( "Category not found"));
-       existingCategory.setName(categoryDto.getName());
-       existingCategory.setIcon(categoryDto.getIcon());
-
-       existingCategory = categoryRepository.save(existingCategory);
-       return toDto(existingCategory);
-
-
+        CategoryEntity existingCategory = categoryRepository.findByIdAndProfileId(categoryId, profile.getId())
+                .orElseThrow(() -> new RuntimeException("Category not found"));
+        existingCategory.setName(categoryDto.getName());
+        existingCategory.setIcon(categoryDto.getIcon());
+        existingCategory = categoryRepository.save(existingCategory);
+        return toDto(existingCategory);
     }
-
 
     private CategoryEntity toEntity(CategoryDto categoryDto, ProfileEntity profileEntity) {
         return CategoryEntity.builder()
                 .name(categoryDto.getName())
                 .icon(categoryDto.getIcon())
                 .profile(profileEntity)
-                .type(categoryDto.getType())
+                .type(categoryDto.getType())   // categoryDto.getType() now returns CategoryType
                 .build();
     }
 
     private CategoryDto toDto(CategoryEntity categoryEntity) {
         return CategoryDto.builder()
                 .id(categoryEntity.getId())
-                .profileId(categoryEntity.getProfile() != null ? categoryEntity.getProfile().getId(): null)
+                .profileId(categoryEntity.getProfile() != null ? categoryEntity.getProfile().getId() : null)
                 .name(categoryEntity.getName())
                 .icon(categoryEntity.getIcon())
                 .createdAt(categoryEntity.getCreatedAt())
                 .updatedAt(categoryEntity.getUpdatedAt())
-                .type(categoryEntity.getType())
+                .type(categoryEntity.getType())   // CategoryType
                 .build();
     }
 }

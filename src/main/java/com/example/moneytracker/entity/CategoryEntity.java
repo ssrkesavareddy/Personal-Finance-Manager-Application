@@ -23,7 +23,7 @@ public class CategoryEntity {
     private Long id;
     private String name;
     private String icon;
-     @Enumerated(EnumType.STRING)   // stores as "INCOME" or "EXPENSE" in DB
+    @Enumerated(EnumType.STRING)
     private CategoryType type;
 
     @CreationTimestamp
@@ -34,7 +34,4 @@ public class CategoryEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="profile_id", nullable=false)
     private ProfileEntity profile;
-
-
-
 }
