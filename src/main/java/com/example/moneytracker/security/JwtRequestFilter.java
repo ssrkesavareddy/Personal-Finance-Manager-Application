@@ -23,12 +23,12 @@ import java.io.IOException;
 public class JwtRequestFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
-   
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-         String path = request.getRequestURI();
+        String path = request.getRequestURI();
 
         // Skip public endpoints
         if (path.contains("/register") || path.contains("/login") || path.contains("/activation")) {
@@ -46,7 +46,9 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             try {
                 email = jwtUtil.extractUsername(jwt);
             } catch (Exception e) {
-                filterChain.doFilter(request, response);
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401
+                response.setContentType("application/json");
+                response.getWriter().write("{\"error\": \"" + e.getMessage() + "\"}");
                 return;
             }
         }
@@ -59,12 +61,18 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                         new UsernamePasswordAuthenticationToken(
                                 userDetails, null, userDetails.getAuthorities()
                         );
-
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
+            } else {
+                // Token invalid — stop here
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json");
+                response.getWriter().write("{\"error\": \"Token is invalid\"}");
+                return;
             }
         }
 
         filterChain.doFilter(request, response);
     }
+
 }
