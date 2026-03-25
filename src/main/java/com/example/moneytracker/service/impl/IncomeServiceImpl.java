@@ -76,7 +76,7 @@ public class IncomeServiceImpl implements IncomeService {
         LocalDate now = LocalDate.now();
         LocalDate startDate = now.withDayOfMonth(1);
         LocalDate endDate = now.withDayOfMonth(now.lengthOfMonth());
-        List<IncomeEntity> list = incomeRepository.findByProfileIdAndDateBetween(profile.getId(), startDate, endDate);
+        List<IncomeEntity> list = incomeRepository.findByProfile_IdAndDateBetween(profile.getId(), startDate, endDate);
         return list.stream().map(this::toDto).toList();
     }
 
@@ -94,7 +94,7 @@ public class IncomeServiceImpl implements IncomeService {
     @Override
     public List<IncomeDto> getLatestFiveIncomesForCurrentUser() {
         ProfileEntity profile = profileService.getCurrentProfile();
-        List<IncomeEntity> list = incomeRepository.findTop5ByProfileIdOrderByDateDesc(profile.getId());
+        List<IncomeEntity> list = incomeRepository.findTop5ByProfile_IdOrderByDateDesc(profile.getId());
         return list.stream().map(this::toDto).toList();
     }
 
@@ -108,7 +108,7 @@ public class IncomeServiceImpl implements IncomeService {
     @Override
     public List<IncomeDto> filterIncome(LocalDate startDate, LocalDate endDate, String keyword, Sort sort) {
         ProfileEntity profile = profileService.getCurrentProfile();
-        List<IncomeEntity> list = incomeRepository.findByProfileIdAndDateBetweenAndNameContainingIgnoreCase(
+        List<IncomeEntity> list = incomeRepository.findByProfile_IdAndDateBetweenAndNameContainingIgnoreCase(
                 profile.getId(), startDate, endDate, keyword, sort);
         return list.stream().map(this::toDto).toList();
     }
