@@ -16,7 +16,7 @@ public interface IncomeService {
     public List<IncomeDto> getLatestFiveIncomesForCurrentUser();
     public BigDecimal getTotalIncomesForCurrentUser();
     public List<IncomeDto> filterIncome(LocalDate startDate , LocalDate endDate, String keyword, Sort sort);
-    public List<IncomeDto> getExpensesForUserOnDate(Long profileId, LocalDate date);
+
 
 
 }
