@@ -22,7 +22,8 @@ public class CategoryEntity {
     private Long id;
     private String name;
     private String icon;
-    private String type;
+     @Enumerated(EnumType.STRING)   // stores as "INCOME" or "EXPENSE" in DB
+    private CategoryType type;
 
     @CreationTimestamp
     @Column(updatable = false)
