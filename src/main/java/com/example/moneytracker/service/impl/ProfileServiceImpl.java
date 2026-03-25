@@ -46,6 +46,7 @@ public class ProfileServiceImpl implements ProfileService {
                 .password(passwordEncoder.encode(profileDto.getPassword()))
                 .profileImgUrl(profileDto.getProfileImgUrl())
                 .isActive(false)
+                .role("USER")
                 .build();
 
         newProfile.setActivationToken(UUID.randomUUID().toString());

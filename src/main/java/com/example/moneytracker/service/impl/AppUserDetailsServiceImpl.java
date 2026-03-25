@@ -23,7 +23,7 @@ public class AppUserDetailsServiceImpl implements AppUserDetailsService {
         return User.builder()
                 .username(existingProfile.getEmail())
                 .password(existingProfile.getPassword())
-                .authorities(Collections.emptySet())
+                .authorities("ROLE_" + existingProfile.getRole())
                 .build();
     }
 }

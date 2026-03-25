@@ -30,13 +30,12 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
         String path = request.getRequestURI();
 
-         if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
-        filterChain.doFilter(request, response);
-        return;
-    }
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
-        // Skip public endpoints
-        if (path.contains("/register") || path.contains("/login") || path.contains("/activation")) {
+        if (path.equals("/login") || path.equals("/register") || path.startsWith("/activation")) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -47,16 +46,20 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         String jwt = null;
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
+
             jwt = authHeader.substring(7);
+            System.out.println("PATH: " + path);
+            System.out.println("JWT: " + jwt);
             try {
                 email = jwtUtil.extractUsername(jwt);
+                System.out.println("EMAIL: " + email);
             } catch (Exception e) {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401
-                response.setContentType("application/json");
-                response.getWriter().write("{\"error\": \"" + e.getMessage() + "\"}");
+                filterChain.doFilter(request, response);
                 return;
             }
         }
+
+        System.out.println("AUTH BEFORE: " + SecurityContextHolder.getContext().getAuthentication());
 
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = userDetailsService.loadUserByUsername(email);
@@ -66,18 +69,15 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                         new UsernamePasswordAuthenticationToken(
                                 userDetails, null, userDetails.getAuthorities()
                         );
+
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
                 SecurityContextHolder.getContext().setAuthentication(authToken);
-            } else {
-                // Token invalid — stop here
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.setContentType("application/json");
-                response.getWriter().write("{\"error\": \"Token is invalid\"}");
-                return;
+
+                System.out.println("AUTH AFTER: " + SecurityContextHolder.getContext().getAuthentication());
             }
         }
 
         filterChain.doFilter(request, response);
     }
-
 }
