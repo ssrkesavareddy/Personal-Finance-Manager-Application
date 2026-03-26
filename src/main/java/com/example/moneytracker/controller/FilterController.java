@@ -30,7 +30,7 @@ public class FilterController {
 
         LocalDate startDate = filter.getStartDate() != null
                 ? filter.getStartDate()
-                : LocalDate.MIN;
+                : LocalDate.of(1970, 1, 1);
 
         LocalDate endDate = filter.getEndDate() != null
                 ? filter.getEndDate()
@@ -51,12 +51,12 @@ public class FilterController {
 
         Sort sort = Sort.by(direction, sortField);
 
-        if ("incomes".equalsIgnoreCase(filter.getType())) {
+        if ("income".equalsIgnoreCase(filter.getType())) {
             List<IncomeDto> incomes =
                     incomeService.filterIncome(startDate, endDate, keyword, sort);
 
             return ResponseEntity.ok(incomes);
-        } else if("expenses".equalsIgnoreCase(filter.getType())) {
+        } else if("expense".equalsIgnoreCase(filter.getType())) {
             return ResponseEntity.ok(
                     expenseService.filterExpenses(startDate, endDate, keyword, sort)
             );
